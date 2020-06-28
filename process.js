@@ -157,7 +157,7 @@ async function getData(){
       addresses[address].occupancyDetails = {updated: new Date(), occupancyData: await getOccupancy(address)};
       processCount++;
     }
-    if (processCount > 100) break;
+    // if (processCount > 5000) break;
   };
   storeData(addresses, `./addresses-${new Date().toISOString()}.json`);
 }
