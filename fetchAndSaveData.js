@@ -121,6 +121,25 @@ async function getOccupancy(address) {
   }
 };
 
+async function getCharacteristics(address) {
+  console.log('fetching Characteristics data for:', address);
+  let response;
+  try {
+    var post = await fetch('https://scout.dcra.dc.gov/api/Results/CAMA', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader,
+      },
+      body: JSON.stringify({searchType: "address", sslOrAddress: address}),
+    });
+    response = await post.json();
+    return response.Result.DATA;
+  } catch(error) {
+    console.log('Response', response);
+  }
+};
+
 async function getData(){
   const refreshDate = new Date('2020-06-27');
   let processCount = 0;
@@ -157,7 +176,12 @@ async function getData(){
       addresses[address].occupancyDetails = {updated: new Date(), occupancyData: await getOccupancy(address)};
       processCount++;
     }
-    // if (processCount > 5000) break;
+    if (!addresses[address].charDetails
+      || new Date(addresses[address].charDetails.updated) < refreshDate) {
+      addresses[address].charDetails = {updated: new Date(), charData: await getCharacteristics(address)};
+      processCount++;
+    }
+    // if (processCount > 10) break;
   };
   storeData(addresses, `./addresses-${new Date().toISOString()}.json`);
 }
