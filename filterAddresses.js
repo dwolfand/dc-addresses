@@ -21,17 +21,28 @@ async function filterAddresses(){
     const numOwners = cur.ownerInfo.ownerData.length;
     const numUnits = cur.charDetails.charData.length && cur.charDetails.charData[0].NUM_UNITS;
     const yrRmdl = cur.charDetails.charData.length && cur.charDetails.charData[0].YR_RMDL;
-    console.log('data', yrRmdl);
+    const saleDate = cur.ownerInfo.ownerData && cur.ownerInfo.ownerData[0] && cur.ownerInfo.ownerData[0].SALEDATE;
+    const taxVal = cur.taxData && Number(cur.taxData['2016_Assessment'].replace('$','').replace(/,/g,''));
+    // console.log('data', saleDate);
+    // if (address.includes(`1739 S `)) {
+    //   console.log('data', saleDate);
+    //   console.log(!numUnits || numUnits === 0 || numUnits < 3);
+    //   console.log(!saleDate || new Date(saleDate) < new Date('2005-01-01'));
+    //   console.log(cur.licenseDetails.licenseData.length >= 1);
+    //   console.log(!taxVal || (taxVal < 2000000 && taxVal > 900000));
+    // }
     if (
-      numOwners <= 3
-      && (!numUnits || numUnits < 3)
+      (!numUnits || numUnits === 0 || numUnits < 3)
       // Addresses with lots of custructions and other "stuff"
-      && JSON.stringify(cur).length < 20000
+      // && JSON.stringify(cur).length < 20000
       // Last sold before 2001
-      && (cur.ownerInfo.ownerData && cur.ownerInfo.ownerData[0] && cur.ownerInfo.ownerData[0].SALEDATE < new Date('2001-01-01'))
+      && (!saleDate || new Date(saleDate) < new Date('2005-01-01'))
+      //Has a legal C/O
       && (cur.licenseDetails.licenseData.length >= 1)
-      && (!yrRmdl || yrRmdl < 2005)
+      // && (!yrRmdl || yrRmdl < 2005)
+      && (!taxVal || (taxVal < 2000000 && taxVal > 900000))
     ){
+      // console.log(address);
       results[address] = cur;
     }
     processCount++;
