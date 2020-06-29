@@ -1,6 +1,7 @@
 const fs = require('fs')
 const fetch = require('node-fetch');
 const addresses = require('./addresses.json');
+const taxData = require('./taxData.json');
 
 const authHeader = 'Bearer eyJraWQiOiJNZmk0dmlpNW5iRmI0YnBscmY0dTFlNktDYXh3aDVIbk1rOFlhbkZhYThVIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULm42clFqV2d4eERoeTJuQ3hPWUtqVkhwcnNXOUY0RTZnR2dLY2JQdFJRRHciLCJpc3MiOiJodHRwczovL2FjY2Vzc2RjLmRjcmEuZGMuZ292L29hdXRoMi9kZWZhdWx0IiwiYXVkIjoiYXBpOi8vZGVmYXVsdCIsImlhdCI6MTU5MzM2NzkxOCwiZXhwIjoxNTkzMzc1MTE4LCJjaWQiOiIwb2FsYXA4Y1FudElzMGIxTjRoNSIsInVpZCI6IjAwdTFtOWs3cURVM3FHZ0tGNGg2Iiwic2NwIjpbInByb2ZpbGUiLCJlbWFpbCIsIm9wZW5pZCJdLCJzdWIiOiJkd29sZmFuZCtkY3JhQGdtYWlsLmNvbSJ9.Q760TadIl5c1SizwAnwpx6GNmxeIoiwhLRaBuVosYNx5TJMur_2hti2xWebXXZydW49o9QkbDR0Uax1CYdQyBBW7TKSqWJyhppxf0323crLgMW9qXUPKnhK9STN8RrYK3DQmu6H1qklditZGJ-YK7VXz0rBtmKEGCD4pzA4QGC34f6HLtkIJq1LQAbHL_ELQumNWy0vhSoswgsyhXCQZjQ_dMAQKPXOZVIxcOfnS4kZZssenQ2E2TmMcsop8rgTfaoDOfely_YpSzbjAExpDvaf5USYNiKrs13yLExx0BWavKPfdCX4BMR4hZj05yktrGA11_g1ghlAFj1kpegeT1A';
 
@@ -180,6 +181,10 @@ async function getData(){
       || new Date(addresses[address].charDetails.updated) < refreshDate) {
       addresses[address].charDetails = {updated: new Date(), charData: await getCharacteristics(address)};
       processCount++;
+    }
+    if (!addresses[address].taxData
+      && addresses[address].ownerInfo.ownerData[0]) {
+      addresses[address].taxData = taxData[addresses[address].ownerInfo.ownerData[0].SSL];
     }
     // if (processCount > 10) break;
   };
