@@ -39,6 +39,8 @@ async function filterAddresses(){
       && (!saleDate || new Date(saleDate) < new Date('2005-01-01'))
       //Has a legal C/O
       && (cur.licenseDetails.licenseData.length >= 1)
+      //Exclude buildings that have multiple units (i.e. condos)
+      && (cur.charDetails.charData.length === 1)
       // && (!yrRmdl || yrRmdl < 2005)
       && (!taxVal || (taxVal < 2000000 && taxVal > 900000))
     ){
