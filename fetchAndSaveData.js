@@ -1,7 +1,7 @@
 const fs = require('fs')
 const fetch = require('node-fetch');
 const addresses = require('./addresses.json');
-const taxData = require('./taxData.json');
+const { getTaxData } = require('./taxDataFetcher.js');
 
 const authHeader = 'Bearer eyJraWQiOiJNZmk0dmlpNW5iRmI0YnBscmY0dTFlNktDYXh3aDVIbk1rOFlhbkZhYThVIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULm42clFqV2d4eERoeTJuQ3hPWUtqVkhwcnNXOUY0RTZnR2dLY2JQdFJRRHciLCJpc3MiOiJodHRwczovL2FjY2Vzc2RjLmRjcmEuZGMuZ292L29hdXRoMi9kZWZhdWx0IiwiYXVkIjoiYXBpOi8vZGVmYXVsdCIsImlhdCI6MTU5MzM2NzkxOCwiZXhwIjoxNTkzMzc1MTE4LCJjaWQiOiIwb2FsYXA4Y1FudElzMGIxTjRoNSIsInVpZCI6IjAwdTFtOWs3cURVM3FHZ0tGNGg2Iiwic2NwIjpbInByb2ZpbGUiLCJlbWFpbCIsIm9wZW5pZCJdLCJzdWIiOiJkd29sZmFuZCtkY3JhQGdtYWlsLmNvbSJ9.Q760TadIl5c1SizwAnwpx6GNmxeIoiwhLRaBuVosYNx5TJMur_2hti2xWebXXZydW49o9QkbDR0Uax1CYdQyBBW7TKSqWJyhppxf0323crLgMW9qXUPKnhK9STN8RrYK3DQmu6H1qklditZGJ-YK7VXz0rBtmKEGCD4pzA4QGC34f6HLtkIJq1LQAbHL_ELQumNWy0vhSoswgsyhXCQZjQ_dMAQKPXOZVIxcOfnS4kZZssenQ2E2TmMcsop8rgTfaoDOfely_YpSzbjAExpDvaf5USYNiKrs13yLExx0BWavKPfdCX4BMR4hZj05yktrGA11_g1ghlAFj1kpegeT1A';
 
@@ -41,7 +41,7 @@ async function getAddressDetails(address) {
     });
     response = await post.json();
     return response.Result.DATA;
-  } catch(error) {
+  } catch (error) {
     console.log('Response', response);
   }
 };
@@ -56,11 +56,11 @@ async function getLicenses(address) {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify({searchType: "address", sslOrAddress: address}),
+      body: JSON.stringify({ searchType: "address", sslOrAddress: address }),
     });
     response = await post.json();
     return response.Result.DATA;
-  } catch(error) {
+  } catch (error) {
     console.log('Response', response);
   }
 };
@@ -75,11 +75,11 @@ async function getPermits(address) {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify({searchType: "address", sslOrAddress: address}),
+      body: JSON.stringify({ searchType: "address", sslOrAddress: address }),
     });
     response = await post.json();
     return response.Result.DATA;
-  } catch(error) {
+  } catch (error) {
     console.log('Response', response);
   }
 };
@@ -94,11 +94,11 @@ async function getInspections(address) {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify({searchType: "address", sslOrAddress: address}),
+      body: JSON.stringify({ searchType: "address", sslOrAddress: address }),
     });
     response = await post.json();
     return response.Result.DATA;
-  } catch(error) {
+  } catch (error) {
     console.log('Response', response);
   }
 };
@@ -113,11 +113,11 @@ async function getOccupancy(address) {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify({searchType: "address", sslOrAddress: address}),
+      body: JSON.stringify({ searchType: "address", sslOrAddress: address }),
     });
     response = await post.json();
     return response.Result.DATA;
-  } catch(error) {
+  } catch (error) {
     console.log('Response', response);
   }
 };
@@ -132,61 +132,64 @@ async function getCharacteristics(address) {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify({searchType: "address", sslOrAddress: address}),
+      body: JSON.stringify({ searchType: "address", sslOrAddress: address }),
     });
     response = await post.json();
     return response.Result.DATA;
-  } catch(error) {
+  } catch (error) {
     console.log('Response', response);
   }
 };
 
-async function getData(){
+async function getData() {
   const refreshDate = new Date('2020-06-27');
   let processCount = 0;
   for (address in addresses) {
     if (!addresses[address].ownerInfo
       || !addresses[address].ownerInfo.ownerData
       || new Date(addresses[address].ownerInfo.updated) < refreshDate) {
-      addresses[address].ownerInfo = {updated: new Date(), ownerData: await getOwners(address)};
+      addresses[address].ownerInfo = { updated: new Date(), ownerData: await getOwners(address) };
       processCount++;
     }
     if (!addresses[address].addressDetails
       // || !addresses[address].addressDetails.addressData
       || new Date(addresses[address].addressDetails.updated) < refreshDate) {
-      addresses[address].addressDetails = {updated: new Date(), addressData: await getAddressDetails(address)};
+      addresses[address].addressDetails = { updated: new Date(), addressData: await getAddressDetails(address) };
       processCount++;
     }
     if (!addresses[address].licenseDetails
       || new Date(addresses[address].licenseDetails.updated) < refreshDate) {
-      addresses[address].licenseDetails = {updated: new Date(), licenseData: await getLicenses(address)};
+      addresses[address].licenseDetails = { updated: new Date(), licenseData: await getLicenses(address) };
       processCount++;
     }
     if (!addresses[address].permitDetails
       || new Date(addresses[address].permitDetails.updated) < refreshDate) {
-      addresses[address].permitDetails = {updated: new Date(), permitData: await getPermits(address)};
+      addresses[address].permitDetails = { updated: new Date(), permitData: await getPermits(address) };
       processCount++;
     }
     if (!addresses[address].inspectionDetails
       || new Date(addresses[address].inspectionDetails.updated) < refreshDate) {
-      addresses[address].inspectionDetails = {updated: new Date(), inspectionData: await getInspections(address)};
+      addresses[address].inspectionDetails = { updated: new Date(), inspectionData: await getInspections(address) };
       processCount++;
     }
     if (!addresses[address].occupancyDetails
       || new Date(addresses[address].occupancyDetails.updated) < refreshDate) {
-      addresses[address].occupancyDetails = {updated: new Date(), occupancyData: await getOccupancy(address)};
+      addresses[address].occupancyDetails = { updated: new Date(), occupancyData: await getOccupancy(address) };
       processCount++;
     }
     if (!addresses[address].charDetails
       || new Date(addresses[address].charDetails.updated) < refreshDate) {
-      addresses[address].charDetails = {updated: new Date(), charData: await getCharacteristics(address)};
+      addresses[address].charDetails = { updated: new Date(), charData: await getCharacteristics(address) };
       processCount++;
     }
-    if (!addresses[address].taxData
+    if ((!addresses[address].taxDetails
+      || new Date(addresses[address].taxDetails.updated) < refreshDate)
       && addresses[address].ownerInfo.ownerData[0]) {
-      addresses[address].taxData = taxData[addresses[address].ownerInfo.ownerData[0].SSL];
+      delete addresses[address].taxData;
+      addresses[address].taxDetails = { updated: new Date(), taxData: await getTaxData(addresses[address].ownerInfo.ownerData[0].SSL) };
+      processCount++;
     }
-    // if (processCount > 10) break;
+    //if (processCount > 10) break;
   };
   storeData(addresses, `./addresses-${new Date().toISOString()}.json`);
 }
